@@ -29,6 +29,8 @@ Version 2 is released, please make sure you read [this V2 Migration Guide](doc/U
 
 Default request manager has moved from Overseerr to Seerr. For existing installs, migrate your data following Seerr migration documentation, then switch your service entry in config from `overseerr` to `seerr`.
 
+Default indexer manager now prefers Prowlarr. Jackett stays available for legacy setups but is disabled by default in the sample config.
+
 ## 📦 Included Applications
 
 | Application          | Web Interface              | Docker image                                                           | Version (image tag) | Notes               |
@@ -37,10 +39,10 @@ Default request manager has moved from Overseerr to Seerr. For existing installs
 | Deluge               | deluge.yourdomain.com      | [linuxserver/deluge](https://hub.docker.com/r/linuxserver/deluge)      | *latest*                | Torrents downloader |
 | Flood               | flood.yourdomain.com      | [jesec/flood](https://hub.docker.com/r/jesec/flood)      | *latest*      | Web client for Deluge (experimental) |
 | qBitTorrent | qbittorrent.yourdomain.com          | [hotio/qbittorrent](cr.hotio.dev/hotio/qbittorrent)    | *latest* | Torrents downloader + VuTorrent alternative WebUI built-in |
-| Sonarr               | sonarr.yourdomain.com      | [linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr)      | *develop*               | TV Shows monitor    |
-| Radarr               | radarr.yourdomain.com      | [linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr)      | *develop*                | Movies monitor      |
+| Sonarr               | sonarr.yourdomain.com      | [linuxserver/sonarr](https://hub.docker.com/r/linuxserver/sonarr)      | *latest*               | TV Shows monitor    |
+| Radarr               | radarr.yourdomain.com      | [linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr)      | *latest*                | Movies monitor      |
 | Bazarr               | bazarr.yourdomain.com      | [linuxserver/bazarr](https://hub.docker.com/r/linuxserver/bazarr)      | *latest*                | Subtitles monitor   |
-| Lidarr               | lidarr.yourdomain.com      | [linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr)      | *develop*               | Music monitor       |
+| Lidarr               | lidarr.yourdomain.com      | [linuxserver/lidarr](https://hub.docker.com/r/linuxserver/lidarr)      | *latest*               | Music monitor       |
 | Readarr               | readarr.yourdomain.com      | [linuxserver/readarr](https://hub.docker.com/r/linuxserver/readarr)      | *nightly*               | Ebook and comic monitor       |
 | Calibre | calibre-admin.yourdomain.com | [linuxserver/calibre](https://hub.docker.com/r/linuxserver/calibre)  | *latest* | eBook management |
 | Calibre-web | calibre.yourdomain.com | [linuxserver/calibre-web](https://hub.docker.com/r/linuxserver/calibre-web)  | *nightly* | Book management UI |
@@ -48,8 +50,8 @@ Default request manager has moved from Overseerr to Seerr. For existing installs
 | Kavita               | Kavita.yourdomain.com      | [linuxserver/kavita](https://docs.linuxserver.io/images/docker-kavita/)      | *latest*               | Comic Book Manager       |
 | Ombi               | ombi.yourdomain.com      | [linuxserver/ombi](https://hub.docker.com/r/linuxserver/ombi)      | *latest*               | Plex content requests       |
 | Seerr               | seerr.yourdomain.com      | [seerr-team/seerr](https://ghcr.io/seerr-team/seerr)      | *latest*               | Plex/Jellyfin/Emby content requests       |
-| Jackett              | jackett.yourdomain.com     | [linuxserver/jackett](https://hub.docker.com/r/linuxserver/jackett)    | *latest*                | Tracker indexer     |
-| Prowlarr              | prowlarr.yourdomain.com     | [linuxserver/prowlarr](https://hub.docker.com/r/linuxserver/prowlarr)    | *develop*                | Tracker indexer |
+| Jackett              | jackett.yourdomain.com     | [linuxserver/jackett](https://hub.docker.com/r/linuxserver/jackett)    | *latest*                | Legacy tracker indexer (optional)     |
+| Prowlarr              | prowlarr.yourdomain.com     | [linuxserver/prowlarr](https://hub.docker.com/r/linuxserver/prowlarr)    | *latest*                | Recommended tracker indexer |
 | JDownloader          | jdownloader.yourdomain.com | [jlesage/jdownloader-2](https://hub.docker.com/r/jlesage/jdownloader-2)| *latest*                | Direct downloader   |
 | Mylar3          | mylar.yourdomain.com | [linuxserver/mylar3](https://lscr.io/linuxserver/mylar3)| *latest*                | Comics manager |
 | Tautulli (plexPy)    | tautulli.yourdomain.com    | [linuxserver/tautulli](https://hub.docker.com/r/linuxserver/tautulli)  | *latest*                | Plex stats and admin |

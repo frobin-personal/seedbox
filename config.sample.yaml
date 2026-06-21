@@ -58,7 +58,7 @@ services:
       enabled: false
       rules: []
   - name: jackett
-    enabled: true
+    enabled: false
     vpn: false
     traefik:
       enabled: true
@@ -261,7 +261,8 @@ services:
       rules:
         - host: portainer.${TRAEFIK_DOMAIN}
           httpAuth: false
-          internalPort: 9000
+          internalPort: 9443
+          internalScheme: https
   - name: netdata
     enabled: true
     vpn: false

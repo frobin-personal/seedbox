@@ -1,5 +1,5 @@
 services:
-  homepage:
+  filebrowser:
     image: filebrowser/filebrowser:s6
     container_name: filebrowser
     restart: always

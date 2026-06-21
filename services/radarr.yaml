@@ -1,6 +1,6 @@
 services:
   radarr:
-    image: ghcr.io/linuxserver/radarr:develop
+    image: ghcr.io/linuxserver/radarr:latest
     container_name: radarr
     restart: always
     volumes:
