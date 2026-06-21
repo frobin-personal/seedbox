@@ -10,10 +10,13 @@ networks:
 # Common volumes used by at least 2 services
 volumes:
   config:
-    driver: local-persist
+    driver: local
     driver_opts:
-      mountpoint: $HOST_CONFIG_PATH
+      type: none
+      o: bind
+      device: ${HOST_CONFIG_PATH}
   torrents: 
+    driver: local
     driver_opts:
       type: nfs
       # Add NFS_IP to your .env with the corresponding value
@@ -21,6 +24,7 @@ volumes:
       # Add NFS_MEDIA_VOLUME to your .env with the corresponding value
       device: $NFS_MEDIA_VOLUME
   downloads:
+    driver: local
     driver_opts:
       type: nfs
       # Add NFS_IP to your .env with the corresponding value
@@ -28,6 +32,7 @@ volumes:
       # Add NFS_MEDIA_VOLUME to your .env with the corresponding value
       device: $NFS_MEDIA_VOLUME/$DOWNLOAD_SUBFOLDER
   documents:
+    driver: local
     driver_opts:
       type: nfs
       # Add NFS_IP to your .env with the corresponding value

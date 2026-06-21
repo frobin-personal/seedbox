@@ -84,19 +84,28 @@ Check the [Configuration Guide](doc/configuration.md).
 ### Dependencies
 
 - [Docker](https://github.com/docker/docker) >= 20.10
-- [Docker Compose](https://github.com/docker/compose) >= 2.27.0
-- [local-persist Docker plugin](https://github.com/MatchbookLab/local-persist): installed directly on host (not in container). This is a volume plugin that extends the default local driver’s functionality by allowing you specify a mountpoint anywhere on the host, which enables the files to always persist, even if the volume is removed via `docker volume rm`. Use *systemd* install for Ubuntu. **Since v2.2 the install script is bundled in seedbox's init script.**
+- [Docker Compose](https://github.com/docker/compose) >= 2.30.0 (plugin `docker compose`)
 - [jq](https://stedolan.github.io/jq/download/) >= 1.5
 - [yq](https://github.com/mikefarah/yq/releases) >= 4
 
+Optional (legacy mode only):
+
+- [local-persist Docker plugin](https://github.com/MatchbookLab/local-persist) for users who explicitly want the historical volume driver behavior.
+
 ### Prepare your host
 
-Before running, please create the volumes which will be statically mapped to the ones on the host:
+Before running, please create host folders that will be bind-mounted by Docker volumes:
 For example:
 
 ```sh
 sudo su -c "mkdir /data && mkdir /data/config && mkdir /data/torrents"
 ./init.sh
+```
+
+If you still need the old `local-persist` behavior, use:
+
+```sh
+./init.sh --with-local-persist
 ```
 
 Edit the ``.env`` and ``.env.custom`` files and change the variables as desired.
@@ -123,7 +132,7 @@ Make sure you install the dependencies and finish configuration before doing thi
 All data is saved in the docker volumes `seedbox_config` or
 `seedbox_torrents`.
 These volumes are mapped to the `config` and `torrents` folders located in `/data` on the host. You can change these static paths in the docker-compose.yml file.
-Thanks to the **local-persist** Docker plugin, the data located in these volumes is persistent, meaning that volumes are not deleted, even when using the ```docker-compose down``` command. It would be a shame to loose everything by running a simple docker command ;-)
+By default, the sample compose uses Docker local bind-backed volumes, so data remains on host paths even when containers are recreated or removed.
 
 # Configure your apps
 

@@ -1,12 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e
+set -Eeuo pipefail
 
 # Load common functions
 source tools/tools.sh
 
 # Check that required tools are installed
 check_utilities
+init_compose_command
 
 SKIP_PULL=0
 DEBUG=0
@@ -27,10 +28,18 @@ for i in "$@"; do
 done
 
 cleanup_on_exit() {
-  rm -f rules.props *-vpn.props *-envfile.props config.json
+  rm -f rules.props .env.concat .env.concat.tmp *-vpn.props *-envfile.props config.json
   [[ -d env ]] && rm -f env/*.tmp
 }
 trap cleanup_on_exit EXIT
+
+run_compose() {
+  if [[ -n "${DOCKER_COMPOSE_BINARY:-}" ]]; then
+    ${DOCKER_COMPOSE_BINARY} "$@"
+    return
+  fi
+  compose "$@"
+}
 
 echo-debug() {
   if [[ ${DEBUG} == "1" ]]; then echo "$@"; fi
@@ -128,10 +137,9 @@ fi
 export COMPOSE_HTTP_TIMEOUT=240
 
 # Retro-compatibility
-[[ -z $HOST_CONFIG_PATH ]] && export HOST_CONFIG_PATH="/data/config"
-[[ -z $HOST_MEDIA_PATH ]] && export HOST_MEDIA_PATH="/data/torrents"
-[[ -z $DOWNLOAD_SUBFOLDER ]] && export DOWNLOAD_SUBFOLDER="deluge"
-[[ -z $DOCKER_COMPOSE_BINARY ]] && export DOCKER_COMPOSE_BINARY="docker-compose"
+[[ -z ${HOST_CONFIG_PATH:-} ]] && export HOST_CONFIG_PATH="/data/config"
+[[ -z ${HOST_MEDIA_PATH:-} ]] && export HOST_MEDIA_PATH="/data/torrents"
+[[ -z ${DOWNLOAD_SUBFOLDER:-} ]] && export DOWNLOAD_SUBFOLDER="deluge"
 
 if [[ ! -f config.yaml ]]; then
   echo "[$0] No config.yaml file found. Copying from sample file..."
@@ -219,8 +227,8 @@ if is_service_enabled nextcloud && ! is_service_enabled mariadb; then
 fi
 
 # Apply other arbitrary custom Traefik config files
-rm -f $f traefik/custom/custom-*
-for f in `find samples/custom-traefik -maxdepth 1 -mindepth 1 -type f | grep -E "\.yml$|\.yaml$" | sort`; do
+rm -f traefik/custom/custom-*
+for f in $(find samples/custom-traefik -maxdepth 1 -mindepth 1 -type f | grep -E "\.yml$|\.yaml$" | sort); do
   echo "[$0] Applying custom Traefik config $f..."
   cp $f traefik/custom/custom-$(basename $f)
 done
@@ -393,7 +401,7 @@ EOF
   if [[ "${var_in_cmd_detected}" == "1" ]]; then
     # Only concat .env.concat with env/${name}.env if it exists
     if [[ -f ./env/${name}.env ]]; then
-      cat ${GLOBAL_ENV_FILE} ./env/${name}.env >> .env.concat.tmp
+      cat "${GLOBAL_ENV_FILE}" "./env/${name}.env" > .env.concat.tmp
       rm -f .env.concat
       mv .env.concat.tmp .env.concat
       export GLOBAL_ENV_FILE=".env.concat"
@@ -478,9 +486,9 @@ rm -f rules.props
 # Post-transformations on the rules file
 # sed -i "s/EMPTYMAP/{}/g" traefik/custom/dynamic-rules.yaml
 # Add simple quotes around Host rule
-sed -i --regexp-extended "s/^(.*: )(Host.*$)/\1'\2'/g" traefik/custom/dynamic-rules.yaml
+sed_inplace_ere "s/^(.*: )(Host.*$)/\\1'\\2'/g" traefik/custom/dynamic-rules.yaml
 # Add double quotes around the backend traefik service
-sed -i --regexp-extended "s/^(.*url: )(.*$)/\1\"\2\"/g" traefik/custom/dynamic-rules.yaml
+sed_inplace_ere "s/^(.*url: )(.*$)/\\1\"\\2\"/g" traefik/custom/dynamic-rules.yaml
 
 rm -f traefik/custom/dynamic-rules-old.yaml
 
@@ -490,13 +498,12 @@ echo "[$0] ***** Config OK. Launching services... *****"
 
 if [[ "${SKIP_PULL}" != "1" ]]; then
   echo "[$0] ***** Pulling all images... *****"
-  ${DOCKER_COMPOSE_BINARY} ${ALL_SERVICES} pull
+  run_compose ${ALL_SERVICES} pull
 fi
 
 echo "[$0] ***** Recreating containers if required... *****"
-${DOCKER_COMPOSE_BINARY} --env-file ${GLOBAL_ENV_FILE} ${ALL_SERVICES} up -d --remove-orphans
+run_compose --env-file "${GLOBAL_ENV_FILE}" ${ALL_SERVICES} up -d --remove-orphans
 echo "[$0] ***** Done updating containers *****"
-rm -f .env.concat
 
 echo "[$0] ***** Clean unused images and volumes... *****"
 docker image prune -af
