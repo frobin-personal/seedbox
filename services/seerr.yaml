@@ -1,0 +1,18 @@
+services:
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    restart: always
+    volumes:
+      - configseerr:/app/config
+    environment:
+      - TZ=${TZ}
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+
+volumes:
+  configseerr:
+    driver: local-persist
+    driver_opts:
+      mountpoint: $HOST_CONFIG_PATH/seerr
