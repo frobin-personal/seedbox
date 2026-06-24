@@ -31,6 +31,10 @@ Default request manager has moved from Overseerr to Seerr. For existing installs
 
 Default indexer manager now prefers Prowlarr. Jackett stays available for legacy setups but is disabled by default in the sample config.
 
+Migration helper available: `./tools/migrate-overseerr-to-seerr.sh` (creates backup, copies app data to Seerr path, updates `config.yaml` if present).
+
+Disk monitoring is available with service `diskmonitor` (enabled by default in sample config) and can notify via ntfy when free space goes below 60GB.
+
 ## 📦 Included Applications
 
 | Application          | Web Interface              | Docker image                                                           | Version (image tag) | Notes               |
@@ -126,6 +130,25 @@ All you need to know is located in the [Configuration Guide](doc/configuration.m
 ```sh
 ./run-seedbox.sh
 ```
+
+### Migrate Overseerr to Seerr
+
+```sh
+./tools/migrate-overseerr-to-seerr.sh
+./run-seedbox.sh
+```
+
+### Disk Space Critical Alerts
+
+`diskmonitor` checks available space on your media mount and sends ntfy alerts when free space goes below the configured threshold.
+
+Configure these variables in `.env.custom`:
+
+- `DISKMONITOR_DISKMONITOR_THRESHOLD_GB` (default `60`)
+- `DISKMONITOR_DISKMONITOR_NTFY_URL` (for example `http://ntfy:2586/seedbox-alerts`)
+- `DISKMONITOR_DISKMONITOR_NTFY_TOKEN` (optional)
+- `DISKMONITOR_DISKMONITOR_POLL_SECONDS` (default `900`)
+- `DISKMONITOR_DISKMONITOR_HOSTNAME` (label used in notifications)
 
 All services and synamic configuration will be automatically created without further action from your part.
 

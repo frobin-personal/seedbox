@@ -1,0 +1,50 @@
+services:
+  diskmonitor:
+    image: alpine:3.22
+    container_name: diskmonitor
+    restart: always
+    environment:
+      - TZ=${TZ}
+      - DISKMONITOR_CHECK_PATH=/monitor
+      - DISKMONITOR_THRESHOLD_GB=${DISKMONITOR_THRESHOLD_GB:-60}
+      - DISKMONITOR_POLL_SECONDS=${DISKMONITOR_POLL_SECONDS:-900}
+      - DISKMONITOR_NTFY_URL=${DISKMONITOR_NTFY_URL:-http://ntfy:2586/seedbox-alerts}
+      - DISKMONITOR_NTFY_TOKEN=${DISKMONITOR_NTFY_TOKEN:-}
+      - DISKMONITOR_HOSTNAME=${DISKMONITOR_HOSTNAME:-seedbox}
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        apk add --no-cache curl >/dev/null
+        alerted=0
+        while true; do
+          available_kb=$(df -Pk "${DISKMONITOR_CHECK_PATH}" | awk 'NR==2 {print $4}')
+          available_gb=$((available_kb / 1024 / 1024))
+
+          if [ "${available_gb}" -lt "${DISKMONITOR_THRESHOLD_GB}" ]; then
+            if [ "${alerted}" -eq 0 ]; then
+              msg="Critical disk space on ${DISKMONITOR_HOSTNAME}: ${available_gb}GB left (threshold ${DISKMONITOR_THRESHOLD_GB}GB)"
+              if [ -n "${DISKMONITOR_NTFY_TOKEN}" ]; then
+                curl -fsS -H "Authorization: Bearer ${DISKMONITOR_NTFY_TOKEN}" -H "Title: Seedbox disk alert" -d "${msg}" "${DISKMONITOR_NTFY_URL}" || true
+              else
+                curl -fsS -H "Title: Seedbox disk alert" -d "${msg}" "${DISKMONITOR_NTFY_URL}" || true
+              fi
+              alerted=1
+            fi
+          else
+            if [ "${alerted}" -eq 1 ]; then
+              msg="Disk space recovered on ${DISKMONITOR_HOSTNAME}: ${available_gb}GB left"
+              if [ -n "${DISKMONITOR_NTFY_TOKEN}" ]; then
+                curl -fsS -H "Authorization: Bearer ${DISKMONITOR_NTFY_TOKEN}" -H "Title: Seedbox disk recovery" -d "${msg}" "${DISKMONITOR_NTFY_URL}" || true
+              else
+                curl -fsS -H "Title: Seedbox disk recovery" -d "${msg}" "${DISKMONITOR_NTFY_URL}" || true
+              fi
+              alerted=0
+            fi
+          fi
+
+          sleep "${DISKMONITOR_POLL_SECONDS}"
+        done
+    volumes:
+      - torrents:/monitor:ro

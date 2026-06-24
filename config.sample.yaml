@@ -201,6 +201,12 @@ services:
         - host: ntfy.${TRAEFIK_DOMAIN}
           httpAuth: true
           internalPort: 2586
+  - name: diskmonitor
+    enabled: true
+    vpn: false
+    traefik:
+      enabled: false
+      rules: []
   - name: jdownloader
     enabled: true
     vpn: false
